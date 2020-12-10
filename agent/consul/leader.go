@@ -981,8 +981,11 @@ func (s *Server) startFederationStateReplication() {
 		// replication shouldn't run in the primary DC
 		return
 	}
-	s.gatewayLocator.SetUseReplicationSignal(true)
-	s.gatewayLocator.SetLastFederationStateReplicationError(nil)
+
+	if s.gatewayLocator != nil {
+		s.gatewayLocator.SetUseReplicationSignal(true)
+		s.gatewayLocator.SetLastFederationStateReplicationError(nil)
+	}
 
 	s.leaderRoutineManager.Start(federationStateReplicationRoutineName, s.federationStateReplicator.Run)
 }
@@ -991,8 +994,10 @@ func (s *Server) stopFederationStateReplication() {
 	// will be a no-op when not started
 	s.leaderRoutineManager.Stop(federationStateReplicationRoutineName)
 
-	s.gatewayLocator.SetUseReplicationSignal(false)
-	s.gatewayLocator.SetLastFederationStateReplicationError(nil)
+	if s.gatewayLocator != nil {
+		s.gatewayLocator.SetUseReplicationSignal(false)
+		s.gatewayLocator.SetLastFederationStateReplicationError(nil)
+	}
 }
 
 // getOrCreateAutopilotConfig is used to get the autopilot config, initializing it if necessary
@@ -1483,6 +1488,10 @@ func (s *Server) reapTombstones(index uint64) {
 	}
 }
 
+func (s *Server) setDatacenterSupportsFederationStates() {
+	atomic.StoreInt32(&s.dcSupportsFederationStates, 1)
+}
+
 func (s *Server) DatacenterSupportsFederationStates() bool {
 	if atomic.LoadInt32(&s.dcSupportsFederationStates) != 0 {
 		return true
@@ -1507,7 +1516,7 @@ func (s *Server) DatacenterSupportsFederationStates() bool {
 	s.router.CheckServers(s.config.Datacenter, state.update)
 
 	if state.supported && state.found {
-		atomic.StoreInt32(&s.dcSupportsFederationStates, 1)
+		s.setDatacenterSupportsFederationStates()
 		return true
 	}
 
