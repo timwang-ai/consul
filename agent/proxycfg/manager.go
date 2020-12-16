@@ -180,6 +180,10 @@ func (m *Manager) ensureProxyServiceLocked(ns *structs.NodeService, token string
 	sid := ns.CompoundServiceID()
 	state, ok := m.proxies[sid]
 
+	m.Logger.Debug("ensureProxyServiceLocked called",
+		"service", sid.String(),
+	)
+
 	if ok {
 		if !state.Changed(ns, token) {
 			// No change
