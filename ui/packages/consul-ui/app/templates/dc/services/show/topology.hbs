@@ -14,7 +14,7 @@
         Datacenter=dc.Name
         Service=items.firstObject
       )}}
-      @isRemoteDC={{isRemoteDC}}
+      @isRemoteDC={{not dc.Local}}
       @hasMetricsProvider={{hasMetricsProvider}}
       @oncreate={{route-action 'createIntention'}}
     />
