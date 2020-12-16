@@ -230,6 +230,9 @@ func (m *Manager) ensureProxyServiceLocked(ns *structs.NodeService, token string
 // removeProxyService is called when a service deregisters and frees all
 // resources for that service.
 func (m *Manager) removeProxyServiceLocked(proxyID structs.ServiceID) {
+	m.Logger.Debug("removeeProxyServiceLocked called",
+		"proxyID", proxyID.String(),
+	)
 	state, ok := m.proxies[proxyID]
 	if !ok {
 		return
